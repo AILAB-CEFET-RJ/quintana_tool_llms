@@ -84,17 +84,17 @@ python executar_avaliacao.py conjunto_1 agentes-multiplos --check-only
 Para rodar poucas redacoes com Ollama:
 
 ```bash
-python executar_avaliacao.py conjunto_1 agente-unico --limit 3 --output-dir resultados_teste
+python executar_avaliacao.py conjunto_1 agente-unico -n 3 --output-dir resultados_teste
 ```
 
 ```bash
-python executar_avaliacao.py conjunto_1 agentes-multiplos --limit 3 --output-dir resultados_teste_multi
+python executar_avaliacao.py conjunto_1 agentes-multiplos --num-redacoes 3 --output-dir resultados_teste_multi
 ```
 
 Com OpenAI:
 
 ```bash
-python executar_avaliacao.py conjunto_1 agentes-multiplos --provedor openai --limit 3 --output-dir resultados_teste_multi_openai
+python executar_avaliacao.py conjunto_1 agentes-multiplos --provedor openai -n 3 --output-dir resultados_teste_multi_openai
 ```
 
 ## Saidas

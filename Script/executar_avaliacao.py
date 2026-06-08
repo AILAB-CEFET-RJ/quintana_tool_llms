@@ -486,7 +486,14 @@ def criar_parser():
     parser.add_argument("--output-dir", default="resultados_batch", help="Pasta de saida.")
     parser.add_argument("--max-attempts", type=int, default=2, help="Tentativas por redacao.")
     parser.add_argument("--retry-delay", type=float, default=1.0, help="Pausa entre tentativas.")
-    parser.add_argument("--limit", type=int, help="Processa apenas as primeiras N redacoes.")
+    parser.add_argument(
+        "-n",
+        "--num-redacoes",
+        "--limit",
+        dest="limit",
+        type=int,
+        help="Processa apenas as primeiras N redacoes.",
+    )
     parser.add_argument("--log-every", type=int, default=50, help="Frequencia de log para itens pulados.")
     parser.add_argument("--overwrite", action="store_true", help="Apaga resultados anteriores antes de rodar.")
     parser.add_argument("--check-only", action="store_true", help="Valida corpus e arquitetura sem chamar o provedor LLM.")
