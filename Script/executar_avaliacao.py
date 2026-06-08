@@ -12,6 +12,8 @@ from pathlib import Path
 
 import httpx
 
+from llm_client import obter_contadores_tokens, resetar_contadores_tokens
+
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 OPENAI_MODEL_PADRAO = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
@@ -347,6 +349,7 @@ async def executar(args):
     modelo = await resolver_modelo_llm(args)
     openai_api_key = args.openai_api_key or os.getenv("OPENAI_API_KEY")
     openai_base_url = args.openai_base_url or OPENAI_BASE_URL
+    resetar_contadores_tokens()
 
     pasta_saida = Path(args.output_dir)
     pasta_json = pasta_saida / "json"
@@ -453,6 +456,14 @@ async def executar(args):
     print(
         f"Concluido: {processadas} processadas, {falhas} falhas, "
         f"{puladas} puladas em {duracao:.1f}s"
+    )
+    tokens = obter_contadores_tokens()
+    print(
+        "Tokens utilizados nesta execucao: "
+        f"entrada={tokens['entrada']}, "
+        f"saida={tokens['saida']}, "
+        f"total={tokens['total']} "
+        f"({tokens['chamadas_com_uso']} chamadas com uso informado)"
     )
     print(f"CSV: {csv_saida}")
     print(f"JSONs: {pasta_json}")

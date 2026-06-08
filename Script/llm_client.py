@@ -7,6 +7,49 @@ OLLAMA_URL_PADRAO = "http://localhost:11434/api/generate"
 OPENAI_BASE_URL_PADRAO = "https://api.openai.com/v1"
 OPENAI_MODEL_PADRAO = "gpt-4.1-mini"
 
+CONTADORES_TOKENS = {
+    "entrada": 0,
+    "saida": 0,
+    "total": 0,
+    "chamadas_com_uso": 0,
+}
+
+
+def resetar_contadores_tokens():
+    for chave in CONTADORES_TOKENS:
+        CONTADORES_TOKENS[chave] = 0
+
+
+def obter_contadores_tokens():
+    return dict(CONTADORES_TOKENS)
+
+
+def registrar_uso_tokens(entrada=0, saida=0, total=None):
+    entrada = int(entrada or 0)
+    saida = int(saida or 0)
+    total = int(total if total is not None else entrada + saida)
+
+    CONTADORES_TOKENS["entrada"] += entrada
+    CONTADORES_TOKENS["saida"] += saida
+    CONTADORES_TOKENS["total"] += total
+    CONTADORES_TOKENS["chamadas_com_uso"] += 1
+
+
+def registrar_uso_ollama(dados):
+    registrar_uso_tokens(
+        entrada=dados.get("prompt_eval_count", 0),
+        saida=dados.get("eval_count", 0),
+    )
+
+
+def registrar_uso_openai(dados):
+    uso = dados.get("usage") or {}
+    registrar_uso_tokens(
+        entrada=uso.get("input_tokens", 0),
+        saida=uso.get("output_tokens", 0),
+        total=uso.get("total_tokens"),
+    )
+
 
 def extrair_texto_openai(resposta):
     if isinstance(resposta.get("output_text"), str):
@@ -73,7 +116,9 @@ async def gerar_texto_ollama(prompt_usuario, system_prompt, modelo=None, ollama_
     async with httpx.AsyncClient(timeout=300.0) as client:
         resposta = await client.post(ollama_url, json=payload)
         resposta.raise_for_status()
-        return resposta.json().get("response", "").strip()
+        dados = resposta.json()
+        registrar_uso_ollama(dados)
+        return dados.get("response", "").strip()
 
 
 async def gerar_texto_openai(
@@ -117,4 +162,6 @@ async def gerar_texto_openai(
     async with httpx.AsyncClient(timeout=300.0) as client:
         resposta = await client.post(f"{openai_base_url}/responses", json=payload, headers=headers)
         resposta.raise_for_status()
-        return extrair_texto_openai(resposta.json())
+        dados = resposta.json()
+        registrar_uso_openai(dados)
+        return extrair_texto_openai(dados)
